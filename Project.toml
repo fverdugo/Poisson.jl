@@ -3,6 +3,10 @@ uuid = "14fd809c-bda0-11e9-3f05-6d702cac03fb"
 authors = ["Francesc Verdugo <fverdugo@cimne.upc.edu>"]
 version = "0.1.0"
 
+[deps]
+Gridap = "56d4f2e9-7ea1-5844-9cf6-b9c51ca7ce8e"
+TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
+
 [compat]
 julia = "1.1"
 
