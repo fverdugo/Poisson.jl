@@ -16,8 +16,8 @@ u(x) = x[1] + x[2]
 f(x) = 0.0
 
 # Define forms of the problem
-a(v,u) = inner(∇(v), ∇(u))
-b(v) = inner(v,f)
+a(v,u) = ∇(v)*∇(u)
+l(v) = v*f
 
 # Define norms to measure the error
 l2(u) = inner(u,u)
@@ -30,27 +30,32 @@ function poisson(n::Integer)
 
   reset_timer!()
 
-  @timeit "model" model = CartesianDiscreteModel(partition=(n,n,n))
+  domain = (0,1,0,1,0,1)
+  partition = (n,n,n)
+  @timeit "model" model = CartesianDiscreteModel(domain,partition)
   
   order = 1
-  diritag = "boundary"
-  @timeit "fespace" fespace = CLagrangianFESpace(Float64,model,order,diritag)
+  @timeit "V" V = TestFESpace(
+    model=model,dirichlet_tags="boundary", conformity=:H1,
+    reffe=:Lagrangian, order=order, valuetype=Float64)
   
-  @timeit "V" V = TestFESpace(fespace)
-
-  @timeit "U" U = TrialFESpace(fespace,u)
+  @timeit "U" U = TrialFESpace(V,u)
   
   @timeit "trian" trian = Triangulation(model)
 
-  @timeit "quad" quad = CellQuadrature(trian,order=2)
-  
-  @timeit "assem" assem = SparseMatrixAssembler(V,U)
-  
-  @timeit "op" op = LinearFEOperator(a,b,V,U,assem,trian,quad)
-  
-  @timeit "AMG setup" p = AMGPreconditioner{SmoothedAggregation}(op.mat)
+  degree = 2
+  @timeit "quad" quad = CellQuadrature(trian,degree)
 
-  @timeit "PCG"  x = cg(op.mat,op.vec,verbose=true,Pl=p)
+  @timeit "t_Ω" t_Ω = AffineFETerm(a,l,trian,quad)
+  
+  @timeit "op" op = AffineFEOperator(V,U,t_Ω)
+
+  A = get_matrix(op)
+  b = get_vector(op)
+  
+  @timeit "AMG setup" p = AMGPreconditioner{SmoothedAggregation}(A)
+
+  @timeit "PCG"  x = cg(A,b,verbose=true,Pl=p)
 
   @timeit "uh" uh = FEFunction(U,x)
   
