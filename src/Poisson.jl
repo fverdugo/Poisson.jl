@@ -3,6 +3,7 @@ module Poisson
 using TimerOutputs
 using IterativeSolvers: cg
 using Preconditioners: AMGPreconditioner, SmoothedAggregation
+using SparseArrays
 
 using Gridap
 import Gridap: ∇
@@ -48,7 +49,7 @@ function poisson(n::Integer)
 
   @timeit "t_Ω" t_Ω = AffineFETerm(a,l,trian,quad)
   
-  @timeit "op" op = AffineFEOperator(V,U,t_Ω)
+  @timeit "op" op = AffineFEOperator(SparseMatrixCSC{Float64,Int32},V,U,t_Ω)
 
   A = get_matrix(op)
   b = get_vector(op)
