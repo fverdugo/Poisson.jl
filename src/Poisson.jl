@@ -14,7 +14,7 @@ export poisson
 u(x) = x[1] + x[2]
 ∇u(x) = VectorValue(1.0,1.0,0.0)
 ∇(::typeof(u)) = ∇u
-f(x) = 0.0
+const f = 0.0
 
 # Define forms of the problem
 a(v,u) = ∇(v)*∇(u)
