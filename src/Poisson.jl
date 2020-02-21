@@ -21,8 +21,8 @@ a(v,u) = ∇(v)*∇(u)
 l(v) = v*f
 
 # Define norms to measure the error
-l2(u) = inner(u,u)
-h1(u) = a(u,u) + l2(u)
+l2(u) = u*u
+h1(u) = ∇(u)*∇(u) + u*u
 
 """
 n: number of elements per direction
