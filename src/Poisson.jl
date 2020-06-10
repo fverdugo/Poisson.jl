@@ -4,6 +4,7 @@ using TimerOutputs
 using IterativeSolvers: cg
 using Preconditioners: AMGPreconditioner, SmoothedAggregation
 using SparseArrays
+using LinearAlgebra: ⋅
 
 using Gridap
 import Gridap: ∇
@@ -17,12 +18,12 @@ u(x) = x[1] + x[2]
 const f = 0.0
 
 # Define forms of the problem
-a(v,u) = ∇(v)*∇(u)
+a(u,v) = ∇(v)⋅∇(u)
 l(v) = v*f
 
 # Define norms to measure the error
 l2(u) = u*u
-h1(u) = ∇(u)*∇(u) + u*u
+h1(u) = ∇(u)⋅∇(u) + u*u
 
 """
 n: number of elements per direction
@@ -49,7 +50,7 @@ function poisson(n::Integer)
 
   @timeit "t_Ω" t_Ω = AffineFETerm(a,l,trian,quad)
   
-  @timeit "op" op = AffineFEOperator(SparseMatrixCSC{Float64,Int32},V,U,t_Ω)
+  @timeit "op" op = AffineFEOperator(SparseMatrixCSC{Float64,Int32},U,V,t_Ω)
 
   A = get_matrix(op)
   b = get_vector(op)
